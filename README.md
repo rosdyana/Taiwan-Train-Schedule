@@ -2,9 +2,10 @@
 Taiwan train schedule based on Taiwan Railways Administration system.
 
 ## To-do
-  - currently only support north region, will added another regions
-  - html output is not beautiful, will beautify it soon
-  - etc
+  - porting to another languages to support another platform, currently in c# with windows executables.
+  - currently only support north region, will added another regions.
+  - html output is not beautiful, will beautify it soon.
+  - etc.
   
 ## How to use
 Taiwan Train Schedule 1.0.0.0
