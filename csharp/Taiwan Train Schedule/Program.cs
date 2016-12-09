@@ -24,6 +24,7 @@ using System.Text;
 
 namespace Taiwan_Train_Schedule
 {
+    //http://commandline.codeplex.com/documentation
     class Options
     {
         [Option('F', "from", Required = true,
@@ -67,7 +68,10 @@ namespace Taiwan_Train_Schedule
             //list of train station in Taiwan with their unique id
             HashSet<string> StationList = new HashSet<string>(new string[]
             {
-                "Neili,1016", "Taipei,1008"
+                "Fulong,1810","Gongliao,1809","Shuangxi,1808","Mudan,1807","Sandiaoling,1806","Houtong,1805","Ruifang,1804","Sijiaoting,1803","Nuannuan,1802","Keelung,1001",
+                "Sangkeng,1029", "Badu,1002","Qidu,1003","Baifu,1030","Wudu,1004","Xizhi,1005","Xike,1031","Nangang,1006","Songshan,1007","Taipei,1008","Wanhua,1009",
+                "Banqiao,1011","Fuzhao,1032","Shulin,1012","South Shulin,1034","Shanjia,1013","Yingge,1014",
+                "Touyuan,1015","Neili,1016","Zhongli,1017","Puxin,1018","Yangmei,1019","Fugang,1020"
             });
 
             //https://msdn.microsoft.com/en-us/library/8kb3ddd4(v=vs.110).aspx
