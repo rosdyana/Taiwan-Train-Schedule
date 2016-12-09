@@ -30,15 +30,15 @@ namespace Taiwan_Train_Schedule
             HelpText = "Input origin of train station.")]
         public string fromStation { get; set; }
 
-        [Option('T',"to", Required = true,
+        [Option('T', "to", Required = true,
             HelpText = "Input destination of train station.")]
         public string toStation { get; set; }
 
-        [Option('s',"start time", DefaultValue = "00:00",
+        [Option('s',"start time",
             HelpText = "Input start time.")]
         public string startTime { get; set; }
 
-        [Option('e', "end time", DefaultValue = "23:59",
+        [Option('e', "end time", DefaultValue = "2359",
             HelpText = "Input end time.")]
         public string endTime { get; set; }
 
@@ -64,11 +64,13 @@ namespace Taiwan_Train_Schedule
     {
         static void Main(string[] args)
         {
-            HashSet<string> NorthStationList = new HashSet<string>(new string[]
+            //list of train station in Taiwan with their unique id
+            HashSet<string> StationList = new HashSet<string>(new string[]
             {
                 "Neili,1016", "Taipei,1008"
             });
-            WebRequest req = WebRequest.Create("http://163.29.3.97/mobile_en/result2.jsp");
+
+            //https://msdn.microsoft.com/en-us/library/8kb3ddd4(v=vs.110).aspx
             TimeZone zone = TimeZone.CurrentTimeZone;
             DateTime local = zone.ToLocalTime(DateTime.Now);
 
@@ -76,8 +78,9 @@ namespace Taiwan_Train_Schedule
             if (CommandLine.Parser.Default.ParseArguments(args, options))
             {
                 if (options.date == null) options.date = local.ToString("yyyy/MM/dd");
-                if (options.startTime != null) options.startTime = local.ToString("hh:mm");
-                foreach (string x in NorthStationList)
+                if (options.startTime == null) options.startTime = local.ToString("HHmm");
+
+                foreach (string x in StationList)
                 {
                     var j = x.Split(',');
                     if (options.fromStation.IndexOf(j[0], StringComparison.OrdinalIgnoreCase) >= 0)
@@ -89,25 +92,30 @@ namespace Taiwan_Train_Schedule
                         options.toStation = j[1];
                     }
                 }
-                string postData = "from1=" + options.fromStation + "&to1=" + options.toStation + "&carclass=" + options.carClass + "&Date=" + options.date + "&sTime=" + options.startTime + "&eTime=" + options.endTime + "&Submit=Submit";
+                
+                string postData = "http://twtraffic.tra.gov.tw/twrail/SearchResult.aspx?searchtype=0&searchdate=" + options.date + "&fromstation=" + options.fromStation + "&tostation=" + options.toStation + "&trainclass=" + options.carClass + "&fromtime=" + options.startTime.Replace(":", "")+"&totime="+options.endTime+"&language=eng";
 
-                byte[] send = Encoding.Default.GetBytes(postData);
-                req.Method = "POST";
-                req.ContentType = "application/x-www-form-urlencoded";
-                req.ContentLength = send.Length;
+                WebRequest request = WebRequest.Create(postData);
+                WebResponse response = request.GetResponse();
 
-                Stream sout = req.GetRequestStream();
-                sout.Write(send, 0, send.Length);
-                sout.Flush();
-                sout.Close();
+                // Get the stream containing content returned by the server.
+                Stream dataStream = response.GetResponseStream();
 
-                WebResponse res = req.GetResponse();
-                StreamReader sr = new StreamReader(res.GetResponseStream());
-                string returnvalue = sr.ReadToEnd();
+                // Open the stream using a StreamReader for easy access.
+                StreamReader reader = new StreamReader(dataStream);
+
+                // Read the content.
+                string responseFromServer = reader.ReadToEnd();
+
+                // Clean up the streams and the response.
+                reader.Close();
+                response.Close();
+
+                //save to html format and open it via web browser
                 var fileName = Guid.NewGuid() + ".html";
                 using (System.IO.StreamWriter file = new System.IO.StreamWriter(fileName, true))
                 {
-                    file.WriteLine(returnvalue);
+                    file.WriteLine(responseFromServer);
                 }
                 System.Diagnostics.Process.Start(fileName);
             }
