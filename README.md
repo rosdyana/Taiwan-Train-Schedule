@@ -18,7 +18,8 @@ Copyright © 2016 Rosdyana Kusuma <rosdyana.kusuma@gmail.com>
   \-c, --class         (Default: 2) Input the car class  0 = express , 1 =
                       ordinary , 2 = all types.
 
-  \--help              Display this help screen.
+  \--help              Display this help screen\.
+  
   
   ## To-do
   - currently only support north region, will added another regions
