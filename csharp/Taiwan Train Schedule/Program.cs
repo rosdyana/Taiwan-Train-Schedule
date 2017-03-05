@@ -19,8 +19,8 @@ using CommandLine.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
-using System.Text;
 
 namespace Taiwan_Train_Schedule
 {
@@ -77,6 +77,20 @@ namespace Taiwan_Train_Schedule
             //https://msdn.microsoft.com/en-us/library/8kb3ddd4(v=vs.110).aspx
             TimeZone zone = TimeZone.CurrentTimeZone;
             DateTime local = zone.ToLocalTime(DateTime.Now);
+
+
+            //delete previous html result
+            string dir = AppDomain.CurrentDomain.BaseDirectory;
+            DirectoryInfo di = new DirectoryInfo(dir);
+            FileInfo[] files = di.GetFiles("*.html")
+                                 .Where(p => p.Extension == ".html").ToArray();
+            foreach (FileInfo file in files)
+                try
+                {
+                    file.Attributes = FileAttributes.Normal;
+                    File.Delete(file.FullName);
+                }
+                catch { }
 
             var options = new Options();
             if (CommandLine.Parser.Default.ParseArguments(args, options))
