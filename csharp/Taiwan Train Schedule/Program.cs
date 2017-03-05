@@ -68,10 +68,28 @@ namespace Taiwan_Train_Schedule
             //list of train station in Taiwan with their unique id
             HashSet<string> StationList = new HashSet<string>(new string[]
             {
-                "Fulong,1810","Gongliao,1809","Shuangxi,1808","Mudan,1807","Sandiaoling,1806","Houtong,1805","Ruifang,1804","Sijiaoting,1803","Nuannuan,1802","Keelung,1001",
-                "Sangkeng,1029", "Badu,1002","Qidu,1003","Baifu,1030","Wudu,1004","Xizhi,1005","Xike,1031","Nangang,1006","Songshan,1007","Taipei,1008","Wanhua,1009",
-                "Banqiao,1011","Fuzhao,1032","Shulin,1012","South Shulin,1034","Shanjia,1013","Yingge,1014",
-                "Touyuan,1015","Neili,1016","Zhongli,1017","Puxin,1018","Yangmei,1019","Fugang,1020"
+                //north region
+                "Fulong,1810","Gongliao,1809","Shuangxi,1808","Mudan,1807","Sandiaoling,1806","Houtong,1805",
+                "Ruifang,1804","Sijiaoting,1803","Nuannuan,1802","Keelung,1001","Sankeng,1029", "Badu,1002",
+                "Qidu,1003","Baifu,1030","Wudu,1004","Xizhi,1005","Xike,1031","Nangang,1006","Songshan,1007",
+                "Taipei,1008","Wanhua,1009","Banqiao,1011","Fuzhao,1032","Shulin,1012","South Shulin,1034",
+                "Shanjia,1013","Yingge,1014","Touyuan,1015","Neili,1016","Zhongli,1017","Puxin,1018",
+                "Yangmei,1019","BaiHwu,1033","Hukou,1021","Xinfeng,1022","Zhubei,1023","North Hsinchu,1024",
+                "Hsinchu,1025","Sanxingqiao,1035","Xiangshan,1026","Jingtong,1908","Pingxi,1907","Fugang,1020",
+                "Lingjiao,1906","Wanggu,1905","Shifen,1904","Dahua,1903","Haikeguan,6103","Badouzi,2003",
+                "Qianjia,2212","Xinzhuang,2213","Zhuzhong,2203","Liujia,2214","Shangyuan,22014","Ronghua,2211",
+                "Zhudong,2205","Hengshan,2206","Jiuzantou,2207","Hexing,2208","Fugui,2209","Neiwan,2210",
+                //middle region
+                "Qiding,1027","Zhunan,1028","Tanwen,1102","Dashan,1104","Houlong,1105","Longgang,1106",
+                "Baishatun,1107","Xinpu,1108","Tongxiao,1109","Yuanli,1110","Zaoqiao,1302","Fengfu,1304",
+                "Miaoli,1305","Nanshi,1307","Tongluo,1308","Sanyi,1310","Rinan,1111","Dajia,1112","Taichung Port,1113",
+                "Qingshui,1114","Shalu,1115","Longjing,1116","Dadu,1117","Zhuifen,1118","Chenggong,1321",
+                "Taian,1314","Houli,1315","Fengyuan,1317","Tanzi,1318","Taiyuan,1323","Taichung,1319",
+                "Daqing,1322","Wuri,1320","Xinwuri,1324","Changhua,1120","Huatan,1202","Dacun,1240",
+                "Yuanlin,1203","Yongjing,1204","Shetou,1205","Tianzhong,1206","Ershui,1207","Linnei,1208",
+                "Shiliu,1209","Douliu,1210","Dounan,1211","Shigui,1212","Yuanquan,2702","Zhuoshui,2703",
+                "Longquan,2704","Jiji,2705","Shuili,2706","Checheng,2707"
+                //south region - WIP
             });
 
             //https://msdn.microsoft.com/en-us/library/8kb3ddd4(v=vs.110).aspx
