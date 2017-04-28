@@ -2,6 +2,7 @@
 # Developer : Ros (rosdyana.kusuma@gmail.com)
 # https://github.com/rosdyana/Taiwan-Train-Schedule
 
+
 library(shiny)
 library(shinyTime)
 library(XML)
@@ -12,8 +13,9 @@ library(stringr)
 nortStation <- read.csv("north_stations.csv", sep = ",", header = TRUE)
 
 ui <- fluidPage(
-  titlePanel(span(
-    tagList(icon("train"), "TRA Schedule"))),
+  headerPanel("TRA Schedule", title = span(
+    tagList(icon("train"), "TRA Schedule")
+  )),
   fluidRow(
     column(2,
            selectInput("from",
@@ -43,7 +45,24 @@ ui <- fluidPage(
   ),
 
   fluidRow(
-    actionButton("search", div(icon("train"), icon("search"), "Search")),
+    column(2,
+           actionButton("search", div(icon("train"), icon("search"), "Search"))
+    ),
+    column(1,
+           actionButton(
+             "github",
+             "Github",
+             icon = icon("github"),
+             onclick = "window.open('https://github.com/rosdyana/Taiwan-Train-Schedule', '_blank')"
+           )
+    ),
+    column(1,
+           actionButton(
+             "about",
+             "About",
+             icon = icon("user")
+           )
+    ),
     DT::dataTableOutput("table")
   )
 )
@@ -93,9 +112,22 @@ server <- function(input, output) {
                              Code = result$QuickSearchDataList.Train.Code, Destination = result$QuickSearchDataList.Origin.Dest, 
                              Departure = result$QuickSearchDataList.Departure, Arrival = result$QuickSearchDataList.Arrival, 
                              Duration = result$QuickSearchDataList.Estimate.Time)
-    finalResult
     
   }))
+  
+  observeEvent(input$about, {
+    showModal(modalDialog(
+      title = span(tagList(icon("info-circle"), "About")),
+      tags$div(
+        HTML(
+          "<img src='https://avatars1.githubusercontent.com/u/4516635?v=3&s=460' width=150><br/><br/>",
+          "<p>Developer : Rosdyana Kusuma</br>Email : <a href=mailto:rosdyana.kusuma@gmail.com>rosdyana.kusuma@gmail.com</a></br>linkedin : <a href='https://www.linkedin.com/in/rosdyanakusuma/' target=blank>Open me</a></p>",
+          "<iframe src='https://www.facebook.com/plugins/share_button.php?href=https%3A%2F%2Frosdyana.shinyapps.io%2FSoccerLeague%2F&layout=box_count&size=small&mobile_iframe=true&width=61&height=40&appId' width='61' height='40' style='border:none;overflow:hidden' scrolling='no' frameborder='0' allowTransparency='true'></iframe>"
+        )
+      ),
+      easyClose = TRUE
+    ))
+  })
 
 }
 
