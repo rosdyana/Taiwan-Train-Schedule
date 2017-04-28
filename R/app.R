@@ -1,3 +1,7 @@
+# TRA Schedule
+# Developer : Ros (rosdyana.kusuma@gmail.com)
+# https://github.com/rosdyana/Taiwan-Train-Schedule
+
 library(shiny)
 library(shinyTime)
 library(XML)
