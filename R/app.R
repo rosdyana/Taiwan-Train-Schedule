@@ -9,13 +9,14 @@ library(XML)
 library(RCurl)
 library(rlist)
 library(stringr)
-library(plyr)
+library(dplyr)
 
 northStation = read.csv("north_stations.csv", sep = ",", header = TRUE)
 southStation = read.csv("south_stations.csv", sep = ",", header = TRUE)
 middleStation = read.csv("middle_stations.csv", sep = ",", header = TRUE)
-# to-do merge to fulldata
-
+# merge data
+dataPart1 = merge(northStation,southStation, all = TRUE)
+fullData <- merge(dataPart1,middleStation, all = TRUE)
 
 ui <- fluidPage(
   headerPanel("TRA Schedule", title = span(
@@ -25,13 +26,17 @@ ui <- fluidPage(
     column(2,
            selectInput("from",
                        "From Station:",
-                       northStation$StationName,
+                       list("North Bound" = northStation$StationName,
+                            "Middle Bound" = middleStation$StationName,
+                            "South Bound" = southStation$StationName),
                        selected = "Neili")
     ),
     column(2,
            selectInput("to",
                        "To Station:",
-                       northStation$StationName,
+                       list("North Bound" = northStation$StationName,
+                            "Middle Bound" = middleStation$StationName,
+                            "South Bound" = southStation$StationName),
                        selected = "Taipei")
     ),
     column(2,
@@ -64,9 +69,8 @@ ui <- fluidPage(
   ),
   br(),
   tabsetPanel(
-    tabPanel("All", DT::dataTableOutput("table")),
-    tabPanel("Express", plotOutput("table1")),
-    tabPanel("Ordinary", plotOutput("table2"))
+    tabPanel("Schedule", DT::dataTableOutput("table")),
+    tabPanel("Map", h2("coming soon"))
   )
 )
 
@@ -74,15 +78,15 @@ server <- function(input, output) {
   inputFrom <- reactive({
     if (input$search == 0) 
       return(NULL)
-    pos = which(northStation$StationName == input$from, arr.ind = T)
-    paste0(northStation$id[pos])
+    pos = which(fullData$StationName == input$from, arr.ind = T)
+    paste0(fullData$id[pos])
   })
   
   inputTo <- reactive({
     if (input$search == 0) 
       return(NULL)
-    pos = which(northStation$StationName == input$to, arr.ind = T)
-    paste0(northStation$id[pos])
+    pos = which(fullData$StationName == input$to, arr.ind = T)
+    paste0(fullData$id[pos])
   })
   
   inputTime <- reactive({
@@ -108,19 +112,32 @@ server <- function(input, output) {
     tables = list.clean(tables, fun = is.null, recursive = FALSE)
     n.rows = unlist(lapply(tables, function(t) dim(t)[1]))
     result = data.frame(tables[which.max(n.rows)])
-    finalResult = data.frame("Train Type" = result$QuickSearchDataList.Train.Type, 
-                             "Train Code" = result$QuickSearchDataList.Train.Code, "Origin.Destination" = result$QuickSearchDataList.Origin.Dest, 
-                             Departure = result$QuickSearchDataList.Departure, Arrival = result$QuickSearchDataList.Arrival, 
+    finalResult = data.frame(Train.Type = result$QuickSearchDataList.Train.Type, 
+                             Train.Code = result$QuickSearchDataList.Train.Code, 
+                             Origin.Destination = result$QuickSearchDataList.Origin.Dest, 
+                             Departure = result$QuickSearchDataList.Departure, 
+                             Arrival = result$QuickSearchDataList.Arrival, 
                              Duration = result$QuickSearchDataList.Estimate.Time)
-    attach(finalResult)
-    expressData <- finalResult[ which(Train.Type=='Chu-Kuang Express' || Train.Type=='Tze-Chiang Limited Express' ||
-                                        Train.Type=='Puyuma' || Train.Type=='Taroko'),]
-    ordinaryData <- finalResult[ which(Train.Type=='Local Train'),]
-    detach(finalResult)
+    # attach(finalResult)
+    # expressData1 <- finalResult[ which(Train.Type=='Chu-Kuang Express'),]
+    # expressData2 <- finalResult[ which(Train.Type=='Tze-Chiang Limited Express'),]
+    # expressData3 <- finalResult[ which(Train.Type=='Puyuma'),]
+    # expressData4 <- finalResult[ which(Train.Type=='Taroko'),]
+    # expressData5 <- finalResult[ which(Train.Type=='Fu-Hsing Semi Express'),]
+    # ordinaryData <- finalResult[ which(Train.Type=='Local Train'),]
+    # detach(finalResult)
+    # expressData <- Reduce(function(x, y) merge(x, y, all=TRUE), list(expressData1, expressData2, 
+    #                                                                  expressData3,expressData4,
+    #                                                                  expressData5))
     
-    if(x=='all') return(finalResult)
-    if(x=='express') return(expressData)
-    if(x=='ordinary') return(ordinaryData)
+    #if(x=='all') return(finalResult)
+    # if(x=='express') {
+    #   finalResult %>% select(Train.Type, Train.Code, Origin.Destination, Departure, Arrival, Duration) %>% filter(Train.Type != "Local Train")
+    # }
+    # if(x=='ordinary') {
+    #   finalResult %>% select(Train.Type, Train.Code, Origin.Destination, Departure, Arrival, Duration) %>% filter(Train.Type == "Local Train")
+    # }
+    # data <- finalResult
   }
   
   output$table <- DT::renderDataTable(DT::datatable({
@@ -129,17 +146,18 @@ server <- function(input, output) {
     getData('all')
   }))
   
-  output$table1 <- DT::renderDataTable(DT::datatable({
-    if (input$search == 0) 
-      return(NULL)
-    h2("atatatat")
-  }))
+  # output$table1 <- DT::renderDataTable(DT::datatable({
+  #   if (input$search == 0) 
+  #     return(NULL)
+  #   getData('express')
+  # }))
+  # 
+  # output$table2 <- DT::renderDataTable(DT::datatable({
+  #   if (input$search == 0) 
+  #     return(NULL)
+  #   getData('ordinary')
+  # }))
   
-  output$table2 <- DT::renderDataTable(DT::datatable({
-    if (input$search == 0) 
-      return(NULL)
-    getData('ordinary')
-  }))
   observeEvent(input$about, {
     showModal(modalDialog(
       title = span(tagList(icon("info-circle"), "About")),
