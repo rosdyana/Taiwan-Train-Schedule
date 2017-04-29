@@ -9,8 +9,13 @@ library(XML)
 library(RCurl)
 library(rlist)
 library(stringr)
+library(plyr)
 
-nortStation <- read.csv("north_stations.csv", sep = ",", header = TRUE)
+northStation = read.csv("north_stations.csv", sep = ",", header = TRUE)
+southStation = read.csv("south_stations.csv", sep = ",", header = TRUE)
+middleStation = read.csv("middle_stations.csv", sep = ",", header = TRUE)
+# to-do merge to fulldata
+
 
 ui <- fluidPage(
   headerPanel("TRA Schedule", title = span(
@@ -20,21 +25,14 @@ ui <- fluidPage(
     column(2,
            selectInput("from",
                        "From Station:",
-                       nortStation$StationName,
+                       northStation$StationName,
                        selected = "Neili")
     ),
     column(2,
            selectInput("to",
                        "To Station:",
-                       nortStation$StationName,
+                       northStation$StationName,
                        selected = "Taipei")
-    ),
-    column(2,
-           selectInput("types",
-                       "Train Types:",
-                       c("All" = "2",
-                         "Ordinary" = "1131,1132,1140",
-                         "Express" = "1100,1101,1102,1107,1110,1120"))
     ),
     column(2,
            dateInput("date", "Date:", value = Sys.Date(), format = "yyyy/mm/dd")
@@ -62,25 +60,29 @@ ui <- fluidPage(
              "About",
              icon = icon("user")
            )
-    ),
-    DT::dataTableOutput("table")
+    )
+  ),
+  br(),
+  tabsetPanel(
+    tabPanel("All", DT::dataTableOutput("table")),
+    tabPanel("Express", plotOutput("table1")),
+    tabPanel("Ordinary", plotOutput("table2"))
   )
 )
 
 server <- function(input, output) {
-  
   inputFrom <- reactive({
     if (input$search == 0) 
       return(NULL)
-    pos = which(nortStation$StationName == input$from, arr.ind = T)
-    paste0(nortStation$id[pos])
+    pos = which(northStation$StationName == input$from, arr.ind = T)
+    paste0(northStation$id[pos])
   })
   
   inputTo <- reactive({
     if (input$search == 0) 
       return(NULL)
-    pos = which(nortStation$StationName == input$to, arr.ind = T)
-    paste0(nortStation$id[pos])
+    pos = which(northStation$StationName == input$to, arr.ind = T)
+    paste0(northStation$id[pos])
   })
   
   inputTime <- reactive({
@@ -96,33 +98,55 @@ server <- function(input, output) {
     paste0(strftime(input$date, "%Y/%m/%d"))
   })
   
-  output$table <- DT::renderDataTable(DT::datatable({
-    if (input$search == 0) 
-      return(NULL)
+  getData <- function(x){
     m_url = paste("http://twtraffic.tra.gov.tw/twrail/PrintResult.aspx?printtype=1&searchdate=", 
                   inputDate(), "&fromstation=", inputFrom(), "&tostation=", inputTo(), 
-                  "&trainclass=", input$types, "&timetype=1&fromtime=", inputTime(), 
+                  "&trainclass=2&timetype=1&fromtime=", inputTime(), 
                   "&totime=2359&language=eng", sep = "")
     theurl = getURL(m_url, .opts = list(ssl.verifypeer = FALSE))
     tables = readHTMLTable(theurl)
     tables = list.clean(tables, fun = is.null, recursive = FALSE)
     n.rows = unlist(lapply(tables, function(t) dim(t)[1]))
     result = data.frame(tables[which.max(n.rows)])
-    finalResult = data.frame(TrainType = result$QuickSearchDataList.Train.Type, 
-                             Code = result$QuickSearchDataList.Train.Code, Destination = result$QuickSearchDataList.Origin.Dest, 
+    finalResult = data.frame("Train Type" = result$QuickSearchDataList.Train.Type, 
+                             "Train Code" = result$QuickSearchDataList.Train.Code, "Origin.Destination" = result$QuickSearchDataList.Origin.Dest, 
                              Departure = result$QuickSearchDataList.Departure, Arrival = result$QuickSearchDataList.Arrival, 
                              Duration = result$QuickSearchDataList.Estimate.Time)
+    attach(finalResult)
+    expressData <- finalResult[ which(Train.Type=='Chu-Kuang Express' || Train.Type=='Tze-Chiang Limited Express' ||
+                                        Train.Type=='Puyuma' || Train.Type=='Taroko'),]
+    ordinaryData <- finalResult[ which(Train.Type=='Local Train'),]
+    detach(finalResult)
     
+    if(x=='all') return(finalResult)
+    if(x=='express') return(expressData)
+    if(x=='ordinary') return(ordinaryData)
+  }
+  
+  output$table <- DT::renderDataTable(DT::datatable({
+    if (input$search == 0) 
+      return(NULL)
+    getData('all')
   }))
   
+  output$table1 <- DT::renderDataTable(DT::datatable({
+    if (input$search == 0) 
+      return(NULL)
+    h2("atatatat")
+  }))
+  
+  output$table2 <- DT::renderDataTable(DT::datatable({
+    if (input$search == 0) 
+      return(NULL)
+    getData('ordinary')
+  }))
   observeEvent(input$about, {
     showModal(modalDialog(
       title = span(tagList(icon("info-circle"), "About")),
       tags$div(
         HTML(
           "<img src='https://avatars1.githubusercontent.com/u/4516635?v=3&s=460' width=150><br/><br/>",
-          "<p>Developer : Rosdyana Kusuma</br>Email : <a href=mailto:rosdyana.kusuma@gmail.com>rosdyana.kusuma@gmail.com</a></br>linkedin : <a href='https://www.linkedin.com/in/rosdyanakusuma/' target=blank>Open me</a></p>",
-          "<iframe src='https://www.facebook.com/plugins/share_button.php?href=https%3A%2F%2Frosdyana.shinyapps.io%2FSoccerLeague%2F&layout=box_count&size=small&mobile_iframe=true&width=61&height=40&appId' width='61' height='40' style='border:none;overflow:hidden' scrolling='no' frameborder='0' allowTransparency='true'></iframe>"
+          "<p>Developer : Rosdyana Kusuma</br>Email : <a href=mailto:rosdyana.kusuma@gmail.com>rosdyana.kusuma@gmail.com</a></br>linkedin : <a href='https://www.linkedin.com/in/rosdyanakusuma/' target=blank>Open me</a></p>"
         )
       ),
       easyClose = TRUE
@@ -132,3 +156,5 @@ server <- function(input, output) {
 }
 
 shinyApp(ui = ui , server = server)
+
+
